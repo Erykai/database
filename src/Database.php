@@ -2,10 +2,21 @@
 
 namespace Erykai\Database;
 
+use PDO;
+use stdClass;
+
+/**
+ * CLASS CRUD
+ */
 class Database extends Resource
 {
     use TraitDatabase;
 
+    /**
+     * @param string $table
+     * @param array $notNull
+     * @param string $id
+     */
     public function __construct(string $table, array $notNull, string $id = 'id')
     {
         $this->conn();
@@ -14,31 +25,43 @@ class Database extends Resource
         $this->notNull = $notNull;
     }
 
-    protected function create(object $data): bool
+    /**
+     * @param $name
+     * @param $value
+     */
+    public function __set($name, $value)
     {
-        if (!$this->notNull($data)) {
-            return false;
+        if (empty($this->data)) {
+            $this->data = new stdClass();
         }
-        $this->params = get_object_vars($data);
-
-        foreach ($this->params as $key => $param) {
-            $this->columns .= ',' . $key;
-            $this->values .= ',:' . $key;
-        }
-
-        $this->columns = substr($this->columns, 1);
-        $this->values = substr($this->values, 1);
-        $this->query = "INSERT INTO $this->table ($this->columns) VALUES ($this->values)";
-        $this->stmt = $this->conn->prepare($this->query);
-        $this->bind($this->params);
-
-        $this->data = $data;
-        return true;
+        $this->data->$name = $value;
     }
 
+    /**
+     * @param $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return $this->data->$name;
+    }
 
+    /**
+     * @param $name
+     * @return bool
+     */
+    public function __isset($name)
+    {
+        return isset($this->data->$name);
+    }
 
-    protected function find(string $columns = '*', string $condition = null, array $params = [])
+    /**
+     * @param string $columns
+     * @param string|null $condition
+     * @param array $params
+     * @return $this
+     */
+    public function find(string $columns = '*', string $condition = null, array $params = []): static
     {
         $this->query = "SELECT $columns FROM $this->table";
         $this->params = $params;
@@ -49,76 +72,155 @@ class Database extends Resource
         return $this;
     }
 
-    protected function inner(string $inner)
+    /**
+     * @param string $inner
+     * @return $this
+     */
+    public function inner(string $inner): static
     {
+        if (str_contains($this->query, 'WHERE')) {
+           $query  = explode("WHERE", $this->query);
+           $this->query = $query[0];
+        }
         $this->query .= " $inner ";
+        if (isset($query[1])){
+            $this->query .= "WHERE $query[1] ";
+        }
         return $this;
     }
 
-    protected function order(string $column, string $order = 'ASC')
+    /**
+     * @param string $column
+     * @param string $order
+     * @return $this
+     */
+    public function order(string $column, string $order = 'ASC'): static
     {
         $this->query .= " ORDER BY $column $order ";
         return $this;
     }
 
-    protected function limit(int $limit)
+    /**
+     * @param string $column
+     * @return $this
+     */
+    public function group(string $column): static
+    {
+        $this->query .= " GROUP BY $column ";
+        return $this;
+    }
+
+    /**
+     * @param int $limit
+     * @return $this
+     */
+    public function limit(int $limit): static
     {
         $this->query .= " LIMIT $limit ";
         return $this;
     }
 
-    protected function offset(int $offset)
+    /**
+     * @param int $offset
+     * @return $this
+     */
+    public function offset(int $offset): static
     {
         $this->query .= " OFFSET $offset ";
         return $this;
     }
 
-    protected function fetch(bool $all = false)
+    /**
+     * @param bool $all
+     * @return object|null
+     */
+    public function fetch(bool $all = false): ?object
     {
+        $this->data = null;
         $this->stmt = $this->conn->prepare($this->query);
         $this->bind($this->params);
-        $this->send();
+        $this->stmt->execute();
 
         if ($all) {
-            return $this->stmt->fetchAll();
+            if ($this->stmt->rowCount()) {
+                $this->data = (object)$this->stmt->fetchAll();
+            } else {
+                $this->error = 'no results found';
+            }
+        } else if ($this->stmt->rowCount()) {
+            $this->data = (object)$this->stmt->fetch();
+        } else {
+            $this->error = 'no results found';
         }
-        return $this->stmt->fetch();
-    }
 
-
-    protected function update()
-    {
-        $stmt = $this->conn->prepare("UPDATE users SET name = :name, email = :email, password = :password WHERE id = :id");
-        $stmt->bindParam(':id', $id);
-        $stmt->bindParam(':name', $name);
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':password', $password);
-
-        $stmt->execute();
-    }
-
-    protected function delete(object $data): bool
-    {
-        $stmt = $this->conn->prepare("DELETE FROM users WHERE id = :id");
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $id = $data->id;
-        return $stmt->execute();
-    }
-
-    protected function getData(): object
-    {
         return $this->data;
     }
 
-
-    protected function send(): bool
+    /**
+     * @param int $id
+     * @return bool
+     */
+    public function delete(int $id): bool
     {
-        if ($this->stmt->execute()) {
-            if ($this->conn->lastInsertId()) {
-                $this->data->id = $this->conn->lastInsertId();
-            }
+
+        $stmt = $this->conn->prepare("DELETE FROM $this->table WHERE $this->id = :$this->id");
+        $stmt->bindParam(":$this->id", $id, PDO::PARAM_INT);
+        if ($stmt->execute()) {
             return true;
         }
+        $this->error = 'failed to delete';
+        return false;
+    }
+
+    /**
+     * @param string $columns
+     * @return object|null
+     */
+    public function data(string $columns = "*"): ?object
+    {
+        if (!empty($this->data->{0})) {
+            return $this->data;
+        }
+
+        $id = $this->id;
+        if (!isset($this->data->$id)) {
+            $this->find($columns, "$id=:$id", [$id => $this->conn->lastInsertId()])->fetch();
+            return $this->data;
+        }
+        $this->find($columns, "$id=:$id", [$id => $this->data->$id])->fetch();
+        return $this->data;
+    }
+
+    /**
+     * @return string|bool
+     */
+    public function error(): string|bool
+    {
+        if (!empty($this->error)) {
+            return $this->error;
+        }
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function save(): bool
+    {
+        $id = $this->id;
+        if (!isset($this->data->$id)) {
+            if ($this->create()) {
+                $this->stmt->execute();
+                return true;
+            }
+            return false;
+        }
+
+        if ($this->update()) {
+            $this->stmt->execute();
+            return true;
+        }
+
         return false;
     }
 

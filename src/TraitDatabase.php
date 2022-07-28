@@ -3,8 +3,15 @@
 namespace Erykai\Database;
 use PDO;
 use PDOException;
+
+/**
+ * CLASS CONN
+ */
 trait TraitDatabase
 {
+    /**
+     * @return PDO
+     */
     private function conn(): PDO
     {
         if (empty($this->conn)) {
