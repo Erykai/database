@@ -16,7 +16,7 @@ class Resource
     /**
      * @var string
      */
-    protected string $id;
+    protected string $nameId;
     /**
      * @var string
      */
@@ -86,7 +86,7 @@ class Resource
      */
     protected function update(): bool|static
     {
-        $id = $this->id;
+        $id = $this->nameId;
         if(!isset($this->data->$id)){
             $this->error = 'no data found';
             return false;
@@ -140,7 +140,7 @@ class Resource
      */
     protected function setQuery(): void
     {
-        $id = $this->id;
+        $id = $this->nameId;
         $this->query = "UPDATE $this->table SET  $this->columns WHERE $id = :$id";
         $this->stmt = $this->conn->prepare($this->query);
         $this->bind($this->params);

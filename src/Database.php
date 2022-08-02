@@ -20,7 +20,7 @@ class Database extends Resource
     public function __construct(string $table, array $notNull, string $id = 'id')
     {
         $this->conn();
-        $this->id = $id;
+        $this->nameId = $id;
         $this->table = $table;
         $this->notNull = $notNull;
     }
@@ -34,7 +34,10 @@ class Database extends Resource
         if (empty($this->data)) {
             $this->data = new stdClass();
         }
-        $this->data->$name = $value;
+        if($name !== 'updated_at' && $name !== 'created_at'){
+            $this->data->$name = $value;
+        }
+
     }
 
     /**
@@ -163,8 +166,8 @@ class Database extends Resource
     public function delete(int $id): bool
     {
 
-        $stmt = $this->conn->prepare("DELETE FROM $this->table WHERE $this->id = :$this->id");
-        $stmt->bindParam(":$this->id", $id, PDO::PARAM_INT);
+        $stmt = $this->conn->prepare("DELETE FROM $this->table WHERE $this->nameId = :$this->nameId");
+        $stmt->bindParam(":$this->nameId", $id, PDO::PARAM_INT);
         if ($stmt->execute()) {
             return true;
         }
@@ -182,7 +185,7 @@ class Database extends Resource
             return $this->data;
         }
 
-        $id = $this->id;
+        $id = $this->nameId;
         if (!isset($this->data->$id)) {
             $this->find($columns, "$id=:$id", [$id => $this->conn->lastInsertId()])->fetch();
             return $this->data;
@@ -207,7 +210,7 @@ class Database extends Resource
      */
     public function save(): bool
     {
-        $id = $this->id;
+        $id = $this->nameId;
         if (!isset($this->data->$id)) {
             if ($this->create()) {
                 $this->stmt->execute();
