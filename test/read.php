@@ -80,3 +80,4 @@ foreach ($users as $user) {
     echo "O $user->name existe e mora reside no endereço: $user->address!</br>";
 }
 */
+var_dump($Users->response());

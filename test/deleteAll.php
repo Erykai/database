@@ -9,14 +9,6 @@ foreach ($removeAll->data() as $userDel) {
     $user = new Users();
     $user->find('id, name', 'id=:id', ['id'=>$userDel->id])->fetch();
     $data = $user->data();
-    if(!$data){
-        echo $user->error();
-    }else{
-        if(!$user->delete($data->id))
-        {
-            echo $user->error();
-        }else{
-            echo "O Cadastro do $data->name foi removido com sucesso";
-        }
-    }
+    $user->delete($data->id);
+    var_dump($user->response());
 }

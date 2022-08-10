@@ -12,10 +12,6 @@ foreach ($updateAll->data() as $userUpdate) {
     $user->find('*', 'email=:email',['email'=>$email])->fetch();
     $users = $user->data();
     $users->email = "asdasdasd@asdasdasd.com";
-    if(!$user->save()){
-        echo $user->error();
-    }else{
-        $user = $user->data();
-        echo "O Cadastro do $user->name foi atualizado com sucesso! </br>";
-    }
+    $user->save();
+    var_dump($user->response());
 }

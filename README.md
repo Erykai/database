@@ -7,7 +7,7 @@ Responsible for making CRUD with database, using PDO, compatible with: Cubrid, F
 Composer:
 
 ```bash
-"erykai/database": "1.0.*"
+"erykai/database": "1.1.*"
 ```
 
 Terminal
@@ -48,19 +48,16 @@ CREATE
 
 ```php
 use Erykai\Database\Users;
+require "test/config.php";
 require "vendor/autoload.php";
 
 $user = new Users();
-$user->name = "Alex de O Vidal";
-$user->email = "contato@webav.com.br";
+$user->name = "Alex de Oliveira Vidal";
+$user->email = "teste@webav.com.br";
 $user->password = "102asda030";
 $user->age = 10;
-if(!$user->save()){
-    echo $user->error();
-}else{
-    $user = $user->data();
-    echo "O Cadastro do $user->name foi feito com sucesso!";
-}
+$user->save();
+var_dump($user->response(), $user->data());
 ```
 
 READ
@@ -138,12 +135,15 @@ foreach ($users as $user) {
     echo "O $user->name existe e mora reside no endereço: $user->address!</br>";
 }
 
+//response
+var_dump($Users->response());
+
 ```
 UPDATE
 
 ```php
 use Erykai\Database\Users;
-
+require "test/config.php";
 require "vendor/autoload.php";
 
 $user = new Users();
@@ -151,18 +151,14 @@ $email = "absurtds@leite.com";
 $user->find('*', 'email=:email',['email'=>$email])->fetch();
 $users = $user->data();
 $users->email = "banana@baasdasdn.cm";
-if(!$user->save()){
-    echo $user->error();
-}else{
-    $user = $user->data();
-    echo "O Cadastro do $user->name foi atualizado com sucesso!";
-}
+$user->save();
+var_dump($user->response());
 ```
 UPDATE ALL
 
 ```php
 use Erykai\Database\Users;
-
+require "test/config.php";
 require "vendor/autoload.php";
 
 $updateAll = new Users();
@@ -174,40 +170,28 @@ foreach ($updateAll->data() as $userUpdate) {
     $user->find('*', 'email=:email',['email'=>$email])->fetch();
     $users = $user->data();
     $users->email = "asdasdasd@asdasdasd.com";
-    if(!$user->save()){
-        echo $user->error();
-    }else{
-        $user = $user->data();
-        echo "O Cadastro do $user->name foi atualizado com sucesso! </br>";
-    }
+    $user->save();
+    var_dump($user->response());
 }
 ```
 DELETE
 
 ```php
 use Erykai\Database\Users;
-
+require "test/config.php";
 require "vendor/autoload.php";
 
 $user = new Users();
 $user->find('id, name', 'id=:id', ['id'=>6])->fetch();
 $data = $user->data();
-if(!$data){
-    echo $user->error();
-}else{
-    if(!$user->delete($data->id))
-    {
-        echo $user->error();
-    }else{
-        echo "O Cadastro do $data->name foi removido com sucesso";
-    }
-}
+$user->delete($data->id);
+var_dump($user->response());
 ```
 DELETE ALL
 
 ```php
 use Erykai\Database\Users;
-
+require "test/config.php";
 require "vendor/autoload.php";
 
 $removeAll = new Users();
@@ -216,16 +200,8 @@ foreach ($removeAll->data() as $userDel) {
     $user = new Users();
     $user->find('id, name', 'id=:id', ['id'=>$userDel->id])->fetch();
     $data = $user->data();
-    if(!$data){
-        echo $user->error();
-    }else{
-        if(!$user->delete($data->id))
-        {
-            echo $user->error();
-        }else{
-            echo "O Cadastro do $data->name foi removido com sucesso";
-        }
-    }
+    $user->delete($data->id);
+    var_dump($user->response());
 }
 ```
 
