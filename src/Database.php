@@ -10,21 +10,6 @@ use stdClass;
  */
 class Database extends Resource
 {
-    use TraitDatabase;
-
-    /**
-     * @param string $table
-     * @param array $notNull
-     * @param string $id
-     */
-    public function __construct(string $table, array $notNull, string $id = 'id')
-    {
-        $this->conn();
-        $this->nameId = $id;
-        $this->table = $table;
-        $this->notNull = $notNull;
-    }
-
     /**
      * @param $name
      * @param $value
@@ -34,10 +19,7 @@ class Database extends Resource
         if (empty($this->data)) {
             $this->data = new stdClass();
         }
-        if($name !== 'updated_at' && $name !== 'created_at'){
-            $this->data->$name = $value;
-        }
-
+        $this->data->$name = $value;
     }
 
     /**
@@ -82,8 +64,8 @@ class Database extends Resource
     public function inner(string $inner): static
     {
         if (str_contains($this->query, 'WHERE')) {
-           $query  = explode("WHERE", $this->query);
-           $this->query = $query[0];
+            $query  = explode("WHERE", $this->query);
+            $this->query = $query[0];
         }
         $this->query .= " $inner ";
         if (isset($query[1])){
@@ -148,12 +130,12 @@ class Database extends Resource
             if ($this->stmt->rowCount()) {
                 $this->data = (object)$this->stmt->fetchAll();
             } else {
-                $this->error = 'no results found';
+                $this->setResponse(200, "success", "no results found");
             }
         } else if ($this->stmt->rowCount()) {
             $this->data = (object)$this->stmt->fetch();
         } else {
-            $this->error = 'no results found';
+            $this->setResponse(200, "success", "no results found");
         }
 
         return $this->data;
@@ -165,13 +147,16 @@ class Database extends Resource
      */
     public function delete(int $id): bool
     {
+        $dynamic = $this->nameId . " " . $id;
 
         $stmt = $this->conn->prepare("DELETE FROM $this->table WHERE $this->nameId = :$this->nameId");
         $stmt->bindParam(":$this->nameId", $id, PDO::PARAM_INT);
+
         if ($stmt->execute()) {
+            $this->setResponse(200, "success", "$dynamic was successfully removed", dynamic: $dynamic);
             return true;
         }
-        $this->error = 'failed to delete';
+        $this->setResponse(400, "error", "failed to delete $dynamic", dynamic: $dynamic);
         return false;
     }
 
@@ -195,17 +180,6 @@ class Database extends Resource
     }
 
     /**
-     * @return string|bool
-     */
-    public function error(): string|bool
-    {
-        if (!empty($this->error)) {
-            return $this->error;
-        }
-        return false;
-    }
-
-    /**
      * @return bool
      */
     public function save(): bool
@@ -214,6 +188,7 @@ class Database extends Resource
         if (!isset($this->data->$id)) {
             if ($this->create()) {
                 $this->stmt->execute();
+                $this->setResponse(200, "success", "registration successful", $this->data);
                 return true;
             }
             return false;
@@ -221,10 +196,17 @@ class Database extends Resource
 
         if ($this->update()) {
             $this->stmt->execute();
+            $this->setResponse(200, "success", "updated successful", $this->data);
             return true;
         }
-
         return false;
+    }
+    /**
+     * @return object
+     */
+    public function response(): object
+    {
+        return $this->getResponse();
     }
 
 }

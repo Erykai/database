@@ -9,6 +9,7 @@ use PDO;
  */
 class Resource
 {
+    use TraitDatabase;
     /**
      * @var PDO
      */
@@ -50,9 +51,21 @@ class Resource
      */
     protected array $notNull;
     /**
-     * @var string
+     * @var object
      */
-    protected string $error;
+    private object $response;
+    /**
+     * @param string $table
+     * @param array $notNull
+     * @param string $id
+     */
+    public function __construct(string $table, array $notNull, string $id = 'id')
+    {
+        $this->conn();
+        $this->nameId = $id;
+        $this->table = $table;
+        $this->notNull = $notNull;
+    }
 
     /**
      * @return $this|null
@@ -88,7 +101,7 @@ class Resource
     {
         $id = $this->nameId;
         if(!isset($this->data->$id)){
-            $this->error = 'no data found';
+            $this->setResponse(400, "error","there is no $id field in the table", dynamic: $id);
             return false;
         }
         $this->setColumns($this->data);
@@ -102,9 +115,9 @@ class Resource
      */
     protected function bind(array $params): void
     {
-            foreach ($params as $key => &$param) {
-                $this->stmt->bindParam(":$key", $param);
-            }
+        foreach ($params as $key => &$param) {
+            $this->stmt->bindParam(":$key", $param);
+        }
     }
 
     /**
@@ -116,7 +129,7 @@ class Resource
         $data = get_object_vars($data);
         foreach ($this->notNull as $key) {
             if (!array_key_exists($key, $data) || empty($data[$key])) {
-                $this->error = "the $key is mandatory, it cannot be null or empty";
+                $this->setResponse(400,'error',"the $key is mandatory, it cannot be null or empty", dynamic: $key);
                 return false;
             }
         }
@@ -144,5 +157,31 @@ class Resource
         $this->query = "UPDATE $this->table SET  $this->columns WHERE $id = :$id";
         $this->stmt = $this->conn->prepare($this->query);
         $this->bind($this->params);
+    }
+
+    /**
+     * @return object
+     */
+    protected function getResponse(): object
+    {
+        return $this->response;
+    }
+
+    /**
+     * @param int $code
+     * @param string $type
+     * @param string $message
+     * @param object|null $data
+     * @param string|null $dynamic
+     */
+    protected function setResponse(int $code, string $type, string $message, ?object $data = null, ?string $dynamic = null): void
+    {
+        $this->response = (object)[
+            "code" => $code,
+            "type" => $type,
+            "message" => $message,
+            "data" => $data,
+            "dynamic" => $dynamic
+        ];
     }
 }
