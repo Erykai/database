@@ -75,13 +75,14 @@ class Database extends Resource
     }
 
     /**
-     * @param string $column
      * @param string $order
      * @return $this
      */
-    public function order(string $column, string $order = 'ASC'): static
+    public function order(string $order = null): static
     {
-        $this->query .= " ORDER BY $column $order ";
+        if($order){
+            $this->query .= " ORDER BY $order ";
+        }
         return $this;
     }
 
@@ -177,6 +178,15 @@ class Database extends Resource
         }
         $this->find($columns, "$id=:$id", [$id => $this->data->$id])->fetch();
         return $this->data;
+    }
+
+    public function count()
+    {
+        $this->data = null;
+        $this->stmt = $this->conn->prepare($this->query);
+        $this->bind($this->params);
+        $this->stmt->execute();
+        return $this->stmt->rowCount();
     }
 
     /**
