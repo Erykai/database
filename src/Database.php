@@ -134,12 +134,12 @@ class Database extends Resource
             if ($this->stmt->rowCount()) {
                 $this->data = (object)$this->stmt->fetchAll();
             } else {
-                $this->setResponse(200, "success", "no results found");
+                $this->setResponse(404, "error", "no results found");
             }
         } else if ($this->stmt->rowCount()) {
             $this->data = (object)$this->stmt->fetch();
         } else {
-            $this->setResponse(200, "success", "no results found");
+            $this->setResponse(404, "error", "no results found");
         }
 
         return $this->data;
