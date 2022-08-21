@@ -17,8 +17,5 @@
   "require": {
     "PHP": ">=8.0",
     "ext-pdo": "*"
-  },
-  "require-dev": {
-    "alexdeovidal/docker-dev": "v1.1.1"
   }
 }
