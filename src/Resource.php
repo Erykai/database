@@ -43,9 +43,9 @@ class Resource
      */
     protected null|string $values = null;
     /**
-     * @var array
+     * @var ?array
      */
-    protected array $params;
+    protected ?array $params;
     /**
      * @var array
      */

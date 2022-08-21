@@ -46,7 +46,7 @@ class Database extends Resource
      * @param array $params
      * @return $this
      */
-    public function find(string $columns = '*', string $condition = null, array $params = []): static
+    public function find(string $columns = '*', string $condition = null, array $params = null): static
     {
         $this->query = "SELECT $columns FROM $this->table";
         $this->params = $params;
@@ -124,6 +124,9 @@ class Database extends Resource
     {
         $this->data = null;
         $this->stmt = $this->conn->prepare($this->query);
+        if(!$this->params){
+            $this->params = [];
+        }
         $this->bind($this->params);
         $this->stmt->execute();
 
@@ -184,6 +187,9 @@ class Database extends Resource
     {
         $this->data = null;
         $this->stmt = $this->conn->prepare($this->query);
+        if(!$this->params){
+            $this->params = [];
+        }
         $this->bind($this->params);
         $this->stmt->execute();
         return $this->stmt->rowCount();
