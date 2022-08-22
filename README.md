@@ -1,4 +1,12 @@
-# database
+# Database erykai/database
+[![Maintainer](http://img.shields.io/badge/maintainer-@alexdeovidal-blue.svg?style=flat-square)](https://instagram.com/alexdeovidal)
+[![Source Code](http://img.shields.io/badge/source-erykai/database-blue.svg?style=flat-square)](https://github.com/erykai/database)
+[![PHP from Packagist](https://img.shields.io/packagist/php-v/erykai/database.svg?style=flat-square)](https://packagist.org/packages/erykai/database)
+[![Latest Version](https://img.shields.io/github/release/erykai/database.svg?style=flat-square)](https://github.com/erykai/database/releases)
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
+[![Quality Score](https://img.shields.io/scrutinizer/g/erykai/database.svg?style=flat-square)](https://scrutinizer-ci.com/g/erykai/database)
+[![Total Downloads](https://img.shields.io/packagist/dt/erykai/database.svg?style=flat-square)](https://packagist.org/packages/erykai/database)
+
 Responsible for making CRUD with database, using PDO, compatible with: Cubrid, FreeTDS / Microsoft SQL Server / Sybase,  Firebird, IBM DB2, IBM Informix Dynamic Server, MySQL 3.x/4.x/5.x, Oracle Call Interface,  ODBC v3 (IBM DB2, unixODBC and win32 ODBC), PostgreSQL, SQLite 3 and SQLite 2, Microsoft SQL Server / SQL Azure e MariaDB
 
 
