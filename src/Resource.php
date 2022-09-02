@@ -27,6 +27,10 @@ class Resource
      */
     protected string $query;
     /**
+     * @var string
+     */
+    protected string $queryEnd = "";
+    /**
      * @var object|null
      */
     protected null|object $data = null;

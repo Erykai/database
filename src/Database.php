@@ -11,6 +11,10 @@ use stdClass;
 class Database extends Resource
 {
     /**
+     * @var string|null
+     */
+    private null|string $returnColumns = null;
+    /**
      * @param $name
      * @param $value
      */
@@ -41,6 +45,16 @@ class Database extends Resource
     }
 
     /**
+     * @param string|null $columns
+     */
+    public function columns(?string $columns = null): void
+    {
+        if($columns){
+            $this->returnColumns = $columns;
+        }
+    }
+
+    /**
      * @param string $columns
      * @param string|null $condition
      * @param array $params
@@ -48,6 +62,10 @@ class Database extends Resource
      */
     public function find(string $columns = '*', string $condition = null, array $params = null): static
     {
+        if($this->returnColumns){
+            $columns = $this->returnColumns . $columns;
+        }
+
         $this->query = "SELECT $columns FROM $this->table";
         $this->params = $params;
         if ($condition) {
@@ -81,7 +99,7 @@ class Database extends Resource
     public function order(string $order = null): static
     {
         if($order){
-            $this->query .= " ORDER BY $order ";
+            $this->queryEnd .= " ORDER BY $order ";
         }
         return $this;
     }
@@ -92,7 +110,7 @@ class Database extends Resource
      */
     public function group(string $column): static
     {
-        $this->query .= " GROUP BY $column ";
+        $this->queryEnd .= " GROUP BY $column ";
         return $this;
     }
 
@@ -102,7 +120,7 @@ class Database extends Resource
      */
     public function limit(int $limit): static
     {
-        $this->query .= " LIMIT $limit ";
+        $this->queryEnd .= " LIMIT $limit ";
         return $this;
     }
 
@@ -112,7 +130,7 @@ class Database extends Resource
      */
     public function offset(int $offset): static
     {
-        $this->query .= " OFFSET $offset ";
+        $this->queryEnd .= " OFFSET $offset ";
         return $this;
     }
 
@@ -122,6 +140,9 @@ class Database extends Resource
      */
     public function fetch(bool $all = false): ?object
     {
+        if($this->queryEnd){
+            $this->query = $this->query . $this->queryEnd;
+        }
         $this->data = null;
         $this->stmt = $this->conn->prepare($this->query);
         if(!$this->params){
