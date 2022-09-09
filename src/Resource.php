@@ -147,7 +147,7 @@ class Resource
     {
         $this->params = get_object_vars($data);
         foreach ($this->params as $key => $param) {
-            $this->columns .= "$key=:$key,";
+            $this->columns .= "`$key`=:$key,";
         }
         $this->columns = substr($this->columns, 0, -1);
     }
