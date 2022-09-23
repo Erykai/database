@@ -57,7 +57,7 @@ class Database extends Resource
     /**
      * @param string $columns
      * @param string|null $condition
-     * @param array $params
+     * @param ?array $params
      * @return $this
      */
     public function find(string $columns = '*', string $condition = null, array $params = null): static
@@ -93,7 +93,7 @@ class Database extends Resource
     }
 
     /**
-     * @param string $order
+     * @param ?string $order
      * @return $this
      */
     public function order(string $order = null): static
@@ -141,7 +141,7 @@ class Database extends Resource
     public function fetch(bool $all = false): ?object
     {
         if($this->queryEnd){
-            $this->query = $this->query . $this->queryEnd;
+            $this->query .= $this->queryEnd;
         }
         $this->data = null;
         $this->stmt = $this->conn->prepare($this->query);
@@ -155,12 +155,12 @@ class Database extends Resource
             if ($this->stmt->rowCount()) {
                 $this->data = (object)$this->stmt->fetchAll();
             } else {
-                $this->setResponse(404, "error", "no results found");
+                $this->setResponse(404, "error", "no results found", "database");
             }
         } else if ($this->stmt->rowCount()) {
             $this->data = (object)$this->stmt->fetch();
         } else {
-            $this->setResponse(404, "error", "no results found");
+            $this->setResponse(404, "error", "no results found", "database");
         }
 
         return $this->data;
@@ -178,10 +178,10 @@ class Database extends Resource
         $stmt->bindParam(":$this->nameId", $id, PDO::PARAM_INT);
 
         if ($stmt->execute()) {
-            $this->setResponse(200, "success", "$dynamic was successfully removed", dynamic: $dynamic);
+            $this->setResponse(200, "success", "$dynamic was successfully removed", "database", dynamic: $dynamic);
             return true;
         }
-        $this->setResponse(400, "error", "failed to delete $dynamic", dynamic: $dynamic);
+        $this->setResponse(400, "error", "failed to delete $dynamic","database", dynamic: $dynamic);
         return false;
     }
 
@@ -225,7 +225,7 @@ class Database extends Resource
         if (!isset($this->data->$id)) {
             if ($this->create()) {
                 $this->stmt->execute();
-                $this->setResponse(200, "success", "registration successful", $this->data);
+                $this->setResponse(200, "success", "registration successful","database", $this->data);
                 return true;
             }
             return false;
@@ -233,7 +233,7 @@ class Database extends Resource
 
         if ($this->update()) {
             $this->stmt->execute();
-            $this->setResponse(200, "success", "updated successful", $this->data);
+            $this->setResponse(200, "success", "updated successful","database", $this->data);
             return true;
         }
         return false;

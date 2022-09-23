@@ -175,15 +175,17 @@ abstract class Resource
      * @param int $code
      * @param string $type
      * @param string $text
+     * @param string $model
      * @param object|null $data
      * @param string|null $dynamic
      */
-    protected function setResponse(int $code, string $type, string $text, ?object $data = null, ?string $dynamic = null): void
+    protected function setResponse(int $code, string $type, string $text, string $model, ?object $data = null, ?string $dynamic = null): void
     {
         $this->response = (object)[
             "code" => $code,
             "type" => $type,
             "text" => $text,
+            "model" => $model,
             "data" => $data,
             "dynamic" => $dynamic
         ];
