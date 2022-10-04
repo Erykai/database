@@ -105,7 +105,7 @@ abstract class Resource
     {
         $id = $this->nameId;
         if(!isset($this->data->$id)){
-            $this->setResponse(400, "error","there is no $id field in the table", dynamic: $id);
+            $this->setResponse(400, "error","there is no $id field in the table", "error", dynamic: $id);
             return false;
         }
         $this->setColumns($this->data);
@@ -133,7 +133,7 @@ abstract class Resource
         $data = get_object_vars($data);
         foreach ($this->notNull as $key) {
             if (!array_key_exists($key, $data) || empty($data[$key])) {
-                $this->setResponse(400,'error',"the $key is mandatory, it cannot be null or empty", dynamic: $key);
+                $this->setResponse(400,'error',"the $key is mandatory, it cannot be null or empty", "error", dynamic: $key);
                 return false;
             }
         }
