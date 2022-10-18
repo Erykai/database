@@ -136,9 +136,9 @@ class Database extends Resource
 
     /**
      * @param bool $all
-     * @return object|null
+     *
      */
-    public function fetch(bool $all = false): ?object
+    public function fetch(bool $all = false): mixed
     {
         if($this->queryEnd){
             $this->query .= $this->queryEnd;
@@ -153,7 +153,7 @@ class Database extends Resource
 
         if ($all) {
             if ($this->stmt->rowCount()) {
-                $this->data = (object)$this->stmt->fetchAll();
+                $this->data = $this->stmt->fetchAll(PDO::FETCH_OBJ);
             } else {
                 $this->setResponse(404, "error", "no results found", "database");
             }

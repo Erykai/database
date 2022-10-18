@@ -31,9 +31,9 @@ abstract class Resource
      */
     protected string $queryEnd = "";
     /**
-     * @var object|null
+     * @var mixed
      */
-    protected null|object $data = null;
+    protected mixed $data = null;
     /**
      * @var object|null
      */
