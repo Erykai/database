@@ -7,6 +7,7 @@ use stdClass;
 
 /**
  * CLASS CRUD
+ * @property string
  */
 class Database extends Resource
 {
