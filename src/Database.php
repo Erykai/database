@@ -156,12 +156,12 @@ class Database extends Resource
             if ($this->stmt->rowCount()) {
                 $this->data = $this->stmt->fetchAll(PDO::FETCH_OBJ);
             } else {
-                $this->setResponse(404, "error", "no results found", "database");
+                $this->setResponse(200, "error", "no results found", "database");
             }
         } else if ($this->stmt->rowCount()) {
             $this->data = (object)$this->stmt->fetch();
         } else {
-            $this->setResponse(404, "error", "no results found", "database");
+            $this->setResponse(200, "error", "no results found", "database");
         }
 
         return $this->data;
