@@ -192,12 +192,14 @@ class Database extends Resource
      */
     public function data(string $columns = "*"): ?object
     {
+
         if (!empty($this->data->{0})) {
             return $this->data;
         }
 
         $id = $this->nameId;
         if (!isset($this->data->$id)) {
+
             $this->find($columns, "$id=:$id", [$id => $this->conn->lastInsertId()])->fetch();
             return $this->data;
         }
@@ -224,8 +226,10 @@ class Database extends Resource
     {
         $id = $this->nameId;
         if (!isset($this->data->$id)) {
+
             if ($this->create()) {
                 $this->stmt->execute();
+                $this->data->$id = $this->conn->lastInsertId();
                 $this->setResponse(200, "success", "registration successful","database", $this->data);
                 return true;
             }
